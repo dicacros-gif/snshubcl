@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!--
+        Android 11+ 패키지 가시성: '앱으로 열기'가 설치된 네이티브 앱을 찾아
+        실행할 수 있도록 대상 SNS 패키지만 명시한다. (실행만 함 — 제어/자동화 아님)
+    -->
+    <queries>
+        <package android:name="com.facebook.katana" />
+        <package android:name="com.instagram.barcelona" />
+        <package android:name="com.instagram.android" />
+        <package android:name="com.linkedin.android" />
+        <package android:name="com.twitter.android" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/ic_launcher_s"
+        android:roundIcon="@drawable/ic_launcher_s"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Snshub"
+        android:usesCleartextTraffic="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".WebActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+    </application>
+</manifest>

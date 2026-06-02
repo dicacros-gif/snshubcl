@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SNS Hub</string>
+    <string name="tagline">5개 SNS를 한 곳에서 — 직접 열어 직접 조작</string>
+    <string name="manual_note">이 앱은 자동화 도구가 아닙니다. 각 SNS를 앱 안 브라우저로 열거나 설치된 앱으로 띄워줄 뿐이며, 친구 추가·팔로우 등 모든 동작은 화면에서 직접 누르셔야 합니다.</string>
+
+    <string name="lang_ko">한국어</string>
+    <string name="lang_en">English</string>
+    <string name="lang_label">콘텐츠 언어</string>
+
+    <string name="open_web">웹뷰로 열기</string>
+    <string name="open_app">앱으로 열기</string>
+
+    <string name="reload">새로고침</string>
+    <string name="go_back">뒤로</string>
+    <string name="go_forward">앞으로</string>
+    <string name="app_not_installed">설치된 앱이 없어 스토어를 엽니다</string>
+</resources>

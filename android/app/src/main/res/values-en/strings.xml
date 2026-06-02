@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SNS Hub</string>
+    <string name="tagline">Five networks in one place — open and operate them yourself</string>
+    <string name="manual_note">This app is not an automation tool. It only opens each network in an in-app browser or launches the installed app. Every action — adding friends, following, etc. — must be tapped by you.</string>
+
+    <string name="lang_ko">Korean</string>
+    <string name="lang_en">English</string>
+    <string name="lang_label">Content language</string>
+
+    <string name="open_web">Open in WebView</string>
+    <string name="open_app">Open app</string>
+
+    <string name="reload">Reload</string>
+    <string name="go_back">Back</string>
+    <string name="go_forward">Forward</string>
+    <string name="app_not_installed">App not installed — opening store</string>
+</resources>

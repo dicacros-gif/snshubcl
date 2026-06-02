@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0d0d0d">
+
+    <!-- 툴바 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#161616"
+        android:paddingStart="12dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SNS"
+            android:textColor="#f0f0f0"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBack"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="‹"
+            android:textSize="18sp"
+            android:minWidth="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFwd"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="›"
+            android:textSize="18sp"
+            android:minWidth="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReload"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="⟳"
+            android:textSize="16sp"
+            android:minWidth="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenApp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="APP"
+            android:textSize="12sp"
+            android:minWidth="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            app:cornerRadius="10dp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:indeterminate="false"
+        android:visibility="gone" />
+
+    <WebView
+        android:id="@+id/web"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

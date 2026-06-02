@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 항상 다크. Material3 DayNight 를 쓰되 배경/표면을 어둡게 고정 -->
+    <style name="Theme.Snshub" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">#0d0d0d</item>
+        <item name="android:statusBarColor">#101010</item>
+        <item name="android:navigationBarColor">#0d0d0d</item>
+    </style>
+</resources>
