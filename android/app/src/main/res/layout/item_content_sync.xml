@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="@color/card_dark"
+    app:cardCornerRadius="20dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/divider"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 새로운 글/영상 가져오기 버튼 (최상단 배치) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRefreshAll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="새로운 글/영상 가져오기"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/accent_primary"
+            android:textColor="@color/bg_dark"
+            android:layout_marginBottom="16dp"
+            app:icon="@android:drawable/ic_menu_rotate"
+            app:iconGravity="textStart"
+            app:iconTint="@color/bg_dark" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSourceBlog1"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Blog Dica"
+                    android:textSize="11sp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:minHeight="36dp"
+                    app:strokeColor="@color/accent_primary"
+                    android:textColor="@color/accent_primary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSourceBlog2"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Blog MacD"
+                    android:textSize="11sp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:minHeight="36dp"
+                    app:strokeColor="@color/accent_primary"
+                    android:textColor="@color/accent_primary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSourceYt1"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Youtube 1"
+                    android:textSize="11sp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:minHeight="36dp"
+                    app:strokeColor="@color/accent_primary"
+                    android:textColor="@color/accent_primary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSourceYt2"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Youtube 2"
+                    android:textSize="11sp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:minHeight="36dp"
+                    app:strokeColor="@color/accent_primary"
+                    android:textColor="@color/accent_primary" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp"
+            android:padding="14dp"
+            android:background="#0DFFFFFF">
+
+            <TextView
+                android:id="@+id/textHookingExample"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:lineSpacingExtra="6dp"
+                android:text="최신 정보를 동기화해주세요." />
+
+            <TextView
+                android:id="@+id/textContentPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:text="원문: 제목 대기 중" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnNextContent"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="다른 무작위 콘텐츠"
+                android:textSize="12sp"
+                app:strokeColor="@color/divider"
+                android:textColor="@color/text_secondary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCopyContent"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.2"
+                android:layout_marginStart="8dp"
+                android:text="전체 문구 복사"
+                android:textSize="12sp"
+                android:backgroundTint="@color/accent_primary"
+                android:textColor="@color/bg_dark" />
+        </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

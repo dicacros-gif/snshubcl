@@ -1,36 +1,96 @@
 package com.snshubcl.app
 
-/**
- * 지원하는 5개 SNS 정의 — 단순 데이터 + 진입 URL + 네이티브 패키지명.
- *
- * 이 앱은 "한 곳에서 열어보는" 브라우저/런처일 뿐이라, 여기 들어가는 정보는
- *  - webUrl : 앱 내 WebView 로 열 진입 주소(로그아웃 상태면 각 플랫폼 로그인 화면이 뜬다)
- *  - pkg    : '앱으로 열기'가 실행할 설치된 네이티브 앱 패키지
- * 두 가지뿐이다. 자동 클릭·신청·스크립트 주입 같은 자동화 정보는 일절 두지 않는다.
- */
 object Sns {
 
     data class Net(
         val id: String,
         val name: String,
-        val accent: String,   // 카드/제목 강조색 (다크 배경에서 보이는 색)
-        val webUrl: String,   // WebView 진입 주소 (모바일 웹)
-        val pkg: String       // 네이티브 앱 패키지
+        val accent: String,
+        val webUrl: String,
+        val exploreUrl: String,
+        val pkg: String,
+        val selectors: Selectors,
+        val dailyLimit: Int
+    )
+
+    data class Selectors(
+        val friend: Array<String>,
+        val like: Array<String>,
+        val comment: Array<String>,
+        val commentInput: Array<String>,
+        val commentSubmit: Array<String>
     )
 
     val ALL = listOf(
-        Net("facebook",  "Facebook",  "#1877F2", "https://m.facebook.com/",    "com.facebook.katana"),
-        Net("threads",   "Threads",   "#EDEDED", "https://www.threads.net/",   "com.instagram.barcelona"),
-        Net("instagram", "Instagram", "#E1306C", "https://www.instagram.com/", "com.instagram.android"),
-        Net("linkedin",  "LinkedIn",  "#0A66C2", "https://www.linkedin.com/",  "com.linkedin.android"),
-        Net("x",         "X",         "#1D9BF0", "https://x.com/",             "com.twitter.android")
+        Net(
+            "facebook", "Facebook", "#1877F2", 
+            "https://m.facebook.com/",
+            "https://m.facebook.com/friends/center/suggestions", 
+            "com.facebook.katana",
+            Selectors(
+                friend = arrayOf("button[aria-label*='친구 추가']", "div[role='button']:has(span:contains('친구 추가'))", "button:contains('추가')"),
+                like = arrayOf("div[role='button'][aria-label='좋아요']", "div.u_likeit_list_btn", "div[aria-label='Like']"),
+                comment = arrayOf("div[aria-label='댓글 달기']", "div[role='button']:has(span:contains('댓글'))"),
+                commentInput = arrayOf("textarea[aria-label*='댓글']", "div[role='textbox']", "input[type='text']"),
+                commentSubmit = arrayOf("div[aria-label*='게시']", "button:contains('게시')")
+            ), 50
+        ),
+        Net(
+            "instagram", "Instagram", "#E1306C", 
+            "https://www.instagram.com/",
+            "https://www.instagram.com/explore/people/", 
+            "com.instagram.android",
+            Selectors(
+                friend = arrayOf("button:contains('팔로우')", "div[role='button']:contains('팔로우')", "button._acan"),
+                like = arrayOf("span[aria-label='좋아요']", "svg[aria-label='좋아요']", "div[role='button'] svg[aria-label='좋아요']"),
+                comment = arrayOf("span[aria-label='댓글 달기']", "div[role='button'] svg[aria-label='댓글']"),
+                commentInput = arrayOf("textarea[aria-label*='댓글']", "textarea[placeholder*='댓글']"),
+                commentSubmit = arrayOf("div[role='button']:contains('게시')", "button:contains('게시')")
+            ), 50
+        ),
+        Net(
+            "threads", "Threads", "#FFFFFF", 
+            "https://www.threads.net/",
+            "https://www.threads.net/search", 
+            "com.instagram.barcelona",
+            Selectors(
+                friend = arrayOf("div[role='button']:has(div:contains('팔로우'))", "button:contains('팔로우')"),
+                like = arrayOf("div[role='button'][aria-label*='좋아요']"),
+                comment = arrayOf("div[role='button'][aria-label*='답글']"),
+                commentInput = arrayOf("div[role='textbox']"),
+                commentSubmit = arrayOf("div[role='button']:contains('게시')")
+            ), 50
+        ),
+        Net(
+            "linkedin", "LinkedIn", "#0A66C2", 
+            "https://www.linkedin.com/",
+            "https://www.linkedin.com/mynetwork/", 
+            "com.linkedin.android",
+            Selectors(
+                friend = arrayOf("button:contains('1촌 신청')", "button:contains('Connect')", "button[aria-label*='1촌 신청']"),
+                like = arrayOf("button[aria-label*='좋아요']", "button.react-button__trigger"),
+                comment = arrayOf("button[aria-label*='댓글']", "button.comment-button"),
+                commentInput = arrayOf("div[role='textbox']", "div.ql-editor"),
+                commentSubmit = arrayOf("button.comments-comment-box__submit-button")
+            ), 20
+        ),
+        Net(
+            "x", "X", "#FFFFFF", 
+            "https://x.com/",
+            "https://x.com/i/connect_people", 
+            "com.twitter.android",
+            Selectors(
+                friend = arrayOf("div[role='button']:has(span:contains('팔로우'))", "div[data-testid*='follow']"),
+                like = arrayOf("div[data-testid='like']", "div[role='button'][aria-label*='좋아요']"),
+                comment = arrayOf("div[data-testid='reply']", "div[role='button'][aria-label*='답글']"),
+                commentInput = arrayOf("div[data-testid='tweetTextarea_0']", "div[role='textbox']"),
+                commentSubmit = arrayOf("div[data-testid='tweetButtonInline']", "button:contains('게시')")
+            ), 100
+        )
     )
 
     fun byId(id: String?): Net = ALL.firstOrNull { it.id == id } ?: ALL[0]
 
-    /** WebView 진입 시 보낼 Accept-Language. 로그아웃 상태의 사이트 언어에 영향을 준다. */
     fun acceptLanguage(lang: String): String =
         if (lang == "en") "en-US,en;q=0.9" else "ko-KR,ko;q=0.9,en;q=0.6"
-
-    fun storeUrl(pkg: String) = "https://play.google.com/store/apps/details?id=$pkg"
 }

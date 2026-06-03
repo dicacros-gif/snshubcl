@@ -1,162 +1,196 @@
 package com.snshubcl.app
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
-import android.webkit.CookieManager
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.ProgressBar
+import android.widget.ScrollView
 import android.widget.TextView
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
+import org.json.JSONArray
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
 
-/**
- * 앱 내 브라우저 화면.
- *
- * 평범한 WebView 브라우저다. 쿠키를 유지해 로그인 세션이 살아있고, 뒤로/앞으로/새로고침과
- * 파일 업로드(프로필 사진 등 정상적인 수동 사용)를 지원한다.
- *
- * 의도적으로 넣지 않은 것:
- *  - addJavascriptInterface (JS→앱 브리지)  ← 없음
- *  - 페이지에 주입하는 자동 클릭/입력 스크립트 ← 없음
- *  - 동작 큐, 딜레이, 랜덤 타이밍            ← 없음
- *  - confirm/alert 자동 통과                ← 없음 (사용자가 직접 확인)
- * 즉 자동화/탐지 회피 요소가 전혀 없는 순수 브라우저다.
- */
 class WebActivity : AppCompatActivity() {
 
     private lateinit var web: WebView
     private lateinit var progress: ProgressBar
+    private lateinit var logText: TextView
+    private lateinit var scrollLog: ScrollView
+    private lateinit var btnAuto: MaterialButton
     private lateinit var net: Sns.Net
-    private var lang: String = "ko"
+    
+    private var isAutoRunning = false
+    private val handler = Handler(Looper.getMainLooper())
+    private val prefs by lazy { getSharedPreferences("snshub_prefs", MODE_PRIVATE) }
+    private val logQueue = ArrayDeque<String>()
 
-    private var filePathCallback: ValueCallback<Array<Uri>>? = null
-    private lateinit var fileChooser: ActivityResultLauncher<Intent>
-
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web)
 
         net = Sns.byId(intent.getStringExtra("sns"))
-        lang = intent.getStringExtra("lang") ?: "ko"
 
         web = findViewById(R.id.web)
         progress = findViewById(R.id.progress)
+        logText = findViewById(R.id.logText)
+        scrollLog = findViewById(R.id.scrollLog)
+        btnAuto = findViewById(R.id.btnAuto)
 
-        val accent = Color.parseColor(net.accent)
-        findViewById<TextView>(R.id.title).apply {
-            text = net.name
-            setTextColor(accent)
-        }
-
+        findViewById<TextView>(R.id.title).text = net.name
+        
         findViewById<MaterialButton>(R.id.btnBack).setOnClickListener { if (web.canGoBack()) web.goBack() }
-        findViewById<MaterialButton>(R.id.btnFwd).setOnClickListener { if (web.canGoForward()) web.goForward() }
+        btnAuto.setOnClickListener { toggleAutomation() }
         findViewById<MaterialButton>(R.id.btnReload).setOnClickListener { web.reload() }
-        findViewById<MaterialButton>(R.id.btnOpenApp).setOnClickListener { openNativeApp(net.pkg) }
-
-        fileChooser = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val cb = filePathCallback
-            filePathCallback = null
-            cb?.onReceiveValue(
-                WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
-            )
-        }
 
         setupWeb()
-        web.loadUrl(net.webUrl, mapOf("Accept-Language" to Sns.acceptLanguage(lang)))
+        
+        val lang = prefs.getString("lang_${net.id}", "ko") ?: "ko"
+        web.loadUrl(net.exploreUrl, mapOf("Accept-Language" to Sns.acceptLanguage(lang)))
+        
+        addLog("SYSTEM: 엔진 대기 중...")
+        
+        if (!prefs.getBoolean("is_auto_mode", true)) {
+            btnAuto.text = "작업 완료 (NEXT)"
+            btnAuto.setBackgroundColor(Color.parseColor("#10B981"))
+            addLog("MODE: 반자동 제어 활성")
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWeb() {
-        val cm = CookieManager.getInstance()
-        cm.setAcceptCookie(true)
-        cm.setAcceptThirdPartyCookies(web, true)
-
         web.settings.apply {
-            javaScriptEnabled = true          // 사이트가 동작하려면 필요 — 우리가 주입하는 스크립트는 없음
+            javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = true
             loadWithOverviewMode = true
             useWideViewPort = true
-            builtInZoomControls = true
-            displayZoomControls = false
-            userAgentString =
-                "Mozilla/5.0 (Linux; Android 14; SM-S918N) AppleWebKit/537.36 " +
-                "(KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
+            userAgentString = "Mozilla/5.0 (Linux; Android 14; SM-S918N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
         }
+
+        web.addJavascriptInterface(AutomationBridge(), "AndroidAutomation")
 
         web.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url ?: return false
-                val scheme = url.scheme ?: ""
-                if (scheme == "http" || scheme == "https") return false  // 웹뷰 내부에서 로드
-                // intent:, market:, mailto:, tel: 등은 외부 앱에 위임
-                return try {
-                    startActivity(Intent(Intent.ACTION_VIEW, url)); true
-                } catch (e: Exception) {
-                    true
-                }
-            }
-
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                progress.visibility = View.VISIBLE
-            }
-
             override fun onPageFinished(view: WebView?, url: String?) {
                 progress.visibility = View.GONE
-                CookieManager.getInstance().flush()
+                addLog("ENGINE: 싱크 완료")
+                injectScript()
             }
         }
-
+        
         web.webChromeClient = object : WebChromeClient() {
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                progress.progress = newProgress
-            }
-
-            override fun onShowFileChooser(
-                view: WebView?,
-                cb: ValueCallback<Array<Uri>>?,
-                params: FileChooserParams?
-            ): Boolean {
-                val intent = params?.createIntent() ?: return false
-                filePathCallback?.onReceiveValue(null)
-                filePathCallback = cb
-                return try {
-                    fileChooser.launch(intent); true
-                } catch (e: Exception) {
-                    filePathCallback = null; false
-                }
+            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                consoleMessage?.let { addLog("JS_LOG: ${it.message()}") }
+                return true
             }
         }
     }
 
-    private fun openNativeApp(pkg: String) {
-        packageManager.getLaunchIntentForPackage(pkg)?.let { startActivity(it) }
+    private fun injectScript() {
+        try {
+            val script = assets.open("automation.js").bufferedReader().use { it.readText() }
+            web.evaluateJavascript(script, null)
+            updateJsConfig()
+        } catch (e: Exception) {
+            addLog("ERROR: 스크립트 로드 실패")
+        }
     }
 
-    @Suppress("DEPRECATION")
-    override fun onBackPressed() {
-        if (web.canGoBack()) web.goBack() else super.onBackPressed()
+    private fun updateJsConfig() {
+        val config = JSONObject().apply {
+            put("isRunning", isAutoRunning)
+            put("lang", prefs.getString("lang_${net.id}", "ko"))
+            put("autoFriend", prefs.getBoolean("auto_friend", true))
+            put("autoLike", prefs.getBoolean("auto_like", true))
+            put("autoComment", prefs.getBoolean("auto_comment", false))
+            put("customComment", prefs.getString("custom_comment_${net.id}", ""))
+        }
+        val sel = net.selectors
+        val selectors = JSONObject().apply {
+            put("friend", JSONArray(sel.friend))
+            put("like", JSONArray(sel.like))
+            put("comment", JSONArray(sel.comment))
+            put("commentInput", JSONArray(sel.commentInput))
+            put("commentSubmit", JSONArray(sel.commentSubmit))
+        }
+        web.evaluateJavascript("window.updateConfig('$config', '$selectors');", null)
     }
 
-    override fun onPause() {
-        super.onPause()
-        CookieManager.getInstance().flush()
+    private fun toggleAutomation() {
+        if (!prefs.getBoolean("is_auto_mode", true)) {
+            onManualWorkDone()
+            return
+        }
+
+        isAutoRunning = !isAutoRunning
+        if (isAutoRunning) {
+            btnAuto.text = "중단"
+            btnAuto.setBackgroundColor(Color.RED)
+            addLog("ACTION: 자동화 시작")
+            updateJsConfig()
+            // 지연 후 첫 단계 실행
+            handler.postDelayed({ executeStep() }, 2000)
+        } else {
+            btnAuto.text = "자동화 시작"
+            btnAuto.setBackgroundColor(Color.parseColor("#6366F1"))
+            addLog("ACTION: 사용자 중단")
+            handler.removeCallbacksAndMessages(null)
+            updateJsConfig()
+        }
+    }
+
+    private fun executeStep() {
+        if (!isAutoRunning) return
+        web.evaluateJavascript("window.runAutomationStep();", null)
+    }
+
+    private fun onManualWorkDone() {
+        AutomationStatsManager.incrementCount(this, net.id, "action")
+        addLog("SUCCESS: 수동 작업 기록")
+        Toast.makeText(this, "작업 완료 기록됨", Toast.LENGTH_SHORT).show()
+        web.reload()
+    }
+
+    private fun addLog(msg: String) {
+        runOnUiThread {
+            val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+            logQueue.addFirst("[$time] $msg")
+            if (logQueue.size > 80) logQueue.removeLast()
+            logText.text = logQueue.joinToString("\n")
+        }
+    }
+
+    inner class AutomationBridge {
+        @JavascriptInterface
+        fun log(msg: String) = addLog("JS: $msg")
+
+        @JavascriptInterface
+        fun onStepFinished(success: Boolean) {
+            if (success) {
+                AutomationStatsManager.incrementCount(this@WebActivity, net.id, "action")
+            }
+            if (isAutoRunning) {
+                val delay = if (prefs.getBoolean("interval_random", true)) {
+                    (8000..15000).random().toLong()
+                } else {
+                    prefs.getInt("fixed_interval", 10) * 1000L
+                }
+                addLog("WAIT: 다음 작업 대기 (${delay/1000}초)")
+                handler.postDelayed({ executeStep() }, delay)
+            }
+        }
     }
 
     override fun onDestroy() {
-        web.destroy()
+        handler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
 }

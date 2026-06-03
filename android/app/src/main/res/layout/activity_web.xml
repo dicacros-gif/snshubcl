@@ -4,98 +4,115 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0d0d0d">
+    android:background="@color/bg_dark">
 
-    <!-- 툴바 -->
+    <!-- Browser Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="#161616"
-        android:paddingStart="12dp"
-        android:paddingEnd="6dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp">
+        android:background="@color/card_dark"
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="SNS"
-            android:textColor="#f0f0f0"
+            android:text="브라우저"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:paddingHorizontal="12dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBack"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:text="‹"
-            android:textSize="18sp"
-            android:minWidth="0dp"
+            android:textSize="20sp"
             android:insetLeft="0dp"
             android:insetRight="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            android:padding="0dp"
+            app:strokeColor="@color/divider" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFwd"
-            style="?attr/materialButtonOutlinedStyle"
+            android:id="@+id/btnAuto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="›"
-            android:textSize="18sp"
-            android:minWidth="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            android:layout_marginStart="8dp"
+            android:text="자동화 시작"
+            android:textSize="11sp"
+            app:cornerRadius="10dp"
+            android:backgroundTint="@color/accent_primary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReload"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="8dp"
             android:text="⟳"
             android:textSize="16sp"
-            android:minWidth="0dp"
             android:insetLeft="0dp"
             android:insetRight="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenApp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="APP"
-            android:textSize="12sp"
-            android:minWidth="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            app:cornerRadius="10dp" />
+            android:padding="0dp"
+            app:strokeColor="@color/divider" />
     </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="100"
-        android:indeterminate="false"
+        android:layout_height="2dp"
+        android:backgroundTint="@color/divider"
+        android:progressTint="@color/accent_primary"
         android:visibility="gone" />
 
     <WebView
         android:id="@+id/web"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="0.65" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.35"
+        android:orientation="vertical"
+        android:background="@color/bg_dark"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="실시간 작업 감사 로그"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1" />
+
+        <ScrollView
+            android:id="@+id/scrollLog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/logText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/status_green"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:lineSpacingExtra="2dp" />
+        </ScrollView>
+    </LinearLayout>
 </LinearLayout>
