@@ -1,25 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SNS 자동화 마스터</string>
-    <string name="automation_control">자동화 제어</string>
-    <string name="interval_strategy">동작 간격 전략</string>
-    <string name="interval_random">랜덤 간격</string>
-    <string name="interval_fixed">고정 간격</string>
-    <string name="fixed_hint">초</string>
-
-    <string name="auto_friend">친구추가</string>
-    <string name="auto_like">좋아요</string>
-    <string name="auto_comment">댓글작성</string>
-
-    <string name="platforms">플랫폼 리스트</string>
-    <string name="btn_web">웹뷰 자동화</string>
-    <string name="btn_app">앱 자동화</string>
-
-    <string name="comment_edit_title">댓글 문구 설정</string>
-    <string name="btn_refresh">다른 문구 생성</string>
-    <string name="btn_save">저장</string>
-
-    <string name="log_title">실시간 작업 로그</string>
-    <string name="start_auto">자동화 시작</string>
-    <string name="stop_auto">자동화 중단</string>
+    <string name="app_name">SNS 허브</string>
 </resources>

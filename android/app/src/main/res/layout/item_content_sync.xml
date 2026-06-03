@@ -16,25 +16,18 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 새로운 글/영상 가져오기 버튼 (최상단 배치) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRefreshAll"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="새로운 글/영상 가져오기"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            android:backgroundTint="@color/accent_primary"
-            android:textColor="@color/bg_dark"
-            android:layout_marginBottom="16dp"
-            app:icon="@android:drawable/ic_menu_rotate"
-            app:iconGravity="textStart"
-            app:iconTint="@color/bg_dark" />
+            android:text="📥 내 콘텐츠 가져오기"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:scrollbars="none">
 
             <LinearLayout
@@ -99,33 +92,56 @@
             </LinearLayout>
         </HorizontalScrollView>
 
-        <LinearLayout
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRefreshAll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="12dp"
-            android:padding="14dp"
-            android:background="#0DFFFFFF">
+            android:text="새로고침"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/accent_primary"
+            android:textColor="@color/bg_dark"
+            app:icon="@android:drawable/ic_menu_rotate"
+            app:iconGravity="textStart"
+            app:iconTint="@color/bg_dark" />
 
-            <TextView
-                android:id="@+id/textHookingExample"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:lineSpacingExtra="6dp"
-                android:text="최신 정보를 동기화해주세요." />
+        <TextView
+            android:id="@+id/textContentPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:lineSpacingExtra="3dp"
+            android:text="원문: 콘텐츠를 가져오세요" />
 
-            <TextView
-                android:id="@+id/textContentPreview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:text="원문: 제목 대기 중" />
-        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="캡션 (직접 수정 가능)"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <EditText
+            android:id="@+id/editCaption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="#0DFFFFFF"
+            android:padding="12dp"
+            android:gravity="top|start"
+            android:minLines="3"
+            android:maxLines="6"
+            android:inputType="textMultiLine|textCapSentences"
+            android:scrollbars="vertical"
+            android:hint="공유할 문구"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="14sp"
+            android:lineSpacingExtra="3dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -139,7 +155,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="다른 무작위 콘텐츠"
+                android:text="다른 글"
                 android:textSize="12sp"
                 app:strokeColor="@color/divider"
                 android:textColor="@color/text_secondary" />
@@ -148,13 +164,25 @@
                 android:id="@+id/btnCopyContent"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.2"
+                android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="전체 문구 복사"
+                android:text="복사"
                 android:textSize="12sp"
+                app:cornerRadius="10dp"
                 android:backgroundTint="@color/accent_primary"
                 android:textColor="@color/bg_dark" />
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShareSheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="다른 앱으로 공유"
+            android:textSize="13sp"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/text_primary" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

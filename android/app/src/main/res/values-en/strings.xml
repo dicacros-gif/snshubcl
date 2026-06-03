@@ -1,25 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SNS Auto Master</string>
-    <string name="automation_control">Automation Control</string>
-    <string name="interval_strategy">Interval Strategy</string>
-    <string name="interval_random">Random</string>
-    <string name="interval_fixed">Fixed</string>
-    <string name="fixed_hint">sec</string>
-
-    <string name="auto_friend">Friends</string>
-    <string name="auto_like">Likes</string>
-    <string name="auto_comment">Comments</string>
-
-    <string name="platforms">Platforms</string>
-    <string name="btn_web">WebView</string>
-    <string name="btn_app">Native App</string>
-
-    <string name="comment_edit_title">Comment Settings</string>
-    <string name="btn_refresh">Refresh Text</string>
-    <string name="btn_save">Save</string>
-
-    <string name="log_title">Audit Log</string>
-    <string name="start_auto">Start</string>
-    <string name="stop_auto">Stop</string>
+    <string name="app_name">SNS Hub</string>
 </resources>

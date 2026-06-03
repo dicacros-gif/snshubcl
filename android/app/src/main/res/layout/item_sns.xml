@@ -57,8 +57,8 @@
                     android:minWidth="0dp"
                     android:paddingHorizontal="12dp"
                     android:minHeight="32dp"
-                    app:strokeColor="@color/accent_red"
-                    android:textColor="@color/accent_red" />
+                    app:strokeColor="@color/accent_blue"
+                    android:textColor="@color/accent_blue" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnLangEn"
@@ -70,61 +70,9 @@
                     android:minWidth="0dp"
                     android:paddingHorizontal="12dp"
                     android:minHeight="32dp"
-                    app:strokeColor="@color/accent_red"
-                    android:textColor="@color/accent_red" />
+                    app:strokeColor="@color/accent_blue"
+                    android:textColor="@color/accent_blue" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/commentArea"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="16dp"
-            android:padding="12dp"
-            android:background="#0DFFFFFF">
-
-            <TextView
-                android:id="@+id/textCommentExample"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp"
-                android:lineSpacingExtra="2dp"
-                android:text="댓글 예시..." />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="10dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRefreshComment"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.2"
-                    android:text="다른 문구 생성"
-                    android:textSize="11sp"
-                    android:minHeight="40dp"
-                    android:backgroundTint="#312E81"
-                    android:textColor="#C084FC"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCopyComment"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.8"
-                    android:layout_marginStart="8dp"
-                    android:text="복사"
-                    android:textSize="11sp"
-                    android:minHeight="40dp"
-                    app:strokeColor="@color/divider"
-                    android:textColor="@color/text_secondary"
-                    app:cornerRadius="10dp" />
-            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -138,7 +86,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="웹뷰 진행"
+                android:text="웹으로 열기"
                 android:textSize="13sp"
                 app:cornerRadius="12dp"
                 android:backgroundTint="@color/accent_primary"
@@ -146,15 +94,27 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnApp"
+                style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="앱 진행"
+                android:text="앱으로 열기"
                 android:textSize="13sp"
                 app:cornerRadius="12dp"
-                android:backgroundTint="@color/accent_primary"
-                android:textColor="@color/bg_dark" />
+                app:strokeColor="@color/divider"
+                android:textColor="@color/text_primary" />
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="이 캡션으로 공유"
+            android:textSize="13sp"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/text_primary" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

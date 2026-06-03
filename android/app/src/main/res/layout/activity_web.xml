@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:background="@color/bg_dark">
 
-    <!-- Browser Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,17 +13,6 @@
         android:gravity="center_vertical"
         android:background="@color/card_dark"
         android:padding="8dp">
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="브라우저"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:paddingHorizontal="12dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnBack"
@@ -38,22 +26,24 @@
             android:padding="0dp"
             app:strokeColor="@color/divider" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAuto"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="자동화 시작"
-            android:textSize="11sp"
-            app:cornerRadius="10dp"
-            android:backgroundTint="@color/accent_primary" />
+            android:layout_weight="1"
+            android:text="브라우저"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="12dp"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReload"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="44dp"
             android:layout_height="44dp"
-            android:layout_marginStart="8dp"
             android:text="⟳"
             android:textSize="16sp"
             android:insetLeft="0dp"
@@ -75,44 +65,5 @@
         android:id="@+id/web"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.65" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.35"
-        android:orientation="vertical"
-        android:background="@color/bg_dark"
-        android:padding="12dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="실시간 작업 감사 로그"
-            android:textColor="@color/text_secondary"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1" />
-
-        <ScrollView
-            android:id="@+id/scrollLog"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="8dp">
-
-            <TextView
-                android:id="@+id/logText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/status_green"
-                android:textSize="11sp"
-                android:fontFamily="monospace"
-                android:lineSpacingExtra="2dp" />
-        </ScrollView>
-    </LinearLayout>
+        android:layout_weight="1" />
 </LinearLayout>
