@@ -116,5 +116,17 @@
             app:cornerRadius="12dp"
             android:backgroundTint="@color/accent_blue"
             android:textColor="@color/text_primary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFind"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="👥 친구찾기 · 팔로우 (직접)"
+            android:textSize="13sp"
+            app:cornerRadius="12dp"
+            app:strokeColor="@color/accent_blue"
+            android:textColor="@color/accent_blue" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

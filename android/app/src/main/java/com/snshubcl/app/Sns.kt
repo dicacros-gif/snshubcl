@@ -3,10 +3,10 @@ package com.snshubcl.app
 import android.net.Uri
 
 /**
- * 플랫폼 정의 + 공식 공유(작성) 엔드포인트.
+ * 플랫폼 정의 + 공식 공유(작성) 엔드포인트 + 친구찾기/팔로우 페이지.
  *
- * 설계 원칙: 자동화는 일절 없다. 모든 게시는 각 플랫폼의 정식 작성 화면에서
- * 사람이 직접 검토하고 누른다. (약관 준수)
+ * 설계 원칙: 자동화는 일절 없다. 게시·친구추가·팔로우 등 모든 동작은 각 플랫폼의
+ * 공식 화면에서 **사람이 직접** 누른다. (약관 준수 / 계정 보호)
  */
 object Sns {
 
@@ -16,15 +16,26 @@ object Sns {
         val emoji: String,
         val accent: String,
         val webUrl: String,   // 인앱 브라우저 홈
-        val pkg: String       // 네이티브 앱 패키지
+        val pkg: String,      // 네이티브 앱 패키지
+        val findUrl: String   // 공식 친구찾기/팔로우(사람찾기) 페이지 — 사람이 직접 추가/팔로우
     )
 
     val ALL = listOf(
-        Net("facebook",  "Facebook",  "🔵", "#1877F2", "https://m.facebook.com/",    "com.facebook.katana"),
-        Net("instagram", "Instagram", "📸", "#E1306C", "https://www.instagram.com/", "com.instagram.android"),
-        Net("threads",   "Threads",   "⚪", "#A78BFA", "https://www.threads.net/",   "com.instagram.barcelona"),
-        Net("linkedin",  "LinkedIn",  "👔", "#0A66C2", "https://www.linkedin.com/",  "com.linkedin.android"),
-        Net("x",         "X",         "🐦", "#60A5FA", "https://x.com/",             "com.twitter.android")
+        Net("facebook",  "Facebook",  "🔵", "#1877F2",
+            "https://m.facebook.com/", "com.facebook.katana",
+            "https://m.facebook.com/friends/center/suggestions"),
+        Net("instagram", "Instagram", "📸", "#E1306C",
+            "https://www.instagram.com/", "com.instagram.android",
+            "https://www.instagram.com/explore/people/"),
+        Net("threads",   "Threads",   "⚪", "#A78BFA",
+            "https://www.threads.net/", "com.instagram.barcelona",
+            "https://www.threads.net/search"),
+        Net("linkedin",  "LinkedIn",  "👔", "#0A66C2",
+            "https://www.linkedin.com/", "com.linkedin.android",
+            "https://www.linkedin.com/mynetwork/"),
+        Net("x",         "X",         "🐦", "#60A5FA",
+            "https://x.com/", "com.twitter.android",
+            "https://x.com/i/connect_people")
     )
 
     fun byId(id: String?): Net = ALL.firstOrNull { it.id == id } ?: ALL[0]

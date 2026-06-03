@@ -238,6 +238,7 @@ class MainActivity : AppCompatActivity() {
             }
             item.findViewById<MaterialButton>(R.id.btnApp).setOnClickListener { openNativeApp(net) }
             item.findViewById<MaterialButton>(R.id.btnShare).setOnClickListener { shareTo(net) }
+            item.findViewById<MaterialButton>(R.id.btnFind).setOnClickListener { openFindPeople(net) }
 
             container.addView(item)
         }
@@ -261,6 +262,17 @@ class MainActivity : AppCompatActivity() {
             openNativeApp(net) // Instagram 등 웹 작성 미지원
             toast("캡션이 복사되었습니다. 앱에서 붙여넣기 하세요.")
         }
+    }
+
+    /** 해당 플랫폼의 공식 친구찾기/팔로우 페이지를 인앱 브라우저로 연다. 추가/팔로우는 사람이 직접. */
+    private fun openFindPeople(net: Sns.Net) {
+        startActivity(
+            Intent(this, WebActivity::class.java)
+                .putExtra("sns", net.id)
+                .putExtra("url", net.findUrl)
+                .putExtra("title", "${net.name} 친구찾기 · 팔로우")
+        )
+        toast("페이지에서 직접 추가/팔로우하세요. (자동 아님)")
     }
 
     private fun openNativeApp(net: Sns.Net) {
