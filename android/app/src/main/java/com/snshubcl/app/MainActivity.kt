@@ -14,17 +14,18 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
+import kotlinx.coroutines.launch
 
 /**
  * 대시보드:
- *  1) 콘텐츠 카드 — 내 블로그/유튜브 RSS를 가져와 캡션 초안을 만들고(직접 수정 가능),
- *     클립보드 복사 / 공유 시트로 내보낸다.
- *  2) 플랫폼 카드 5개 — 인앱 브라우저(웹)·네이티브 앱 열기, 그리고
- *     "이 캡션으로 공유"(각 플랫폼의 공식 작성 화면을 띄움, 게시는 사람이 직접).
+ *  1) 콘텐츠 카드 — 내 블로그/유튜브 RSS의 **최신** 글을 가져와 수정 가능한 캡션을 만들고,
+ *     복사 / 공유 시트로 내보낸다. 네트워크 실패 시 마지막 성공본(SharedPreferences)을 보여준다.
+ *  2) 플랫폼 카드 5개 — 인앱 브라우저·네이티브 앱 열기 + "이 캡션으로 공유"(공식 작성 화면).
  *
- * 자동 클릭/팔로우/좋아요/댓글 같은 자동화는 없다.
+ * 자동 클릭/팔로우/좋아요/댓글 같은 자동화는 없다. 게시는 사람이 직접.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -33,16 +34,23 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editCaption: EditText
     private lateinit var textPreview: TextView
     private var currentLink: String = ""
-    private var currentSource: String = ContentCrawler.SOURCE_KEYS.first()
+    private var currentSource: String = "Youtube 1"
+    private var currentFeeds: List<ContentCrawler.FeedItem> = emptyList()
+    private var currentIndex: Int = 0
     private val sourceButtons = mutableMapOf<String, MaterialButton>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main)            // UI 먼저 표시
 
         val container = findViewById<LinearLayout>(R.id.list)
+        currentSource = prefs.getString("last_source", "Youtube 1") ?: "Youtube 1"
         setupContentCard(container)
         setupPlatformCards(container)
+
+        loadSource(currentSource)                          // 시작 즉시 최신 가져오기(백그라운드)
+        // 두 유튜브 최신을 캐시에 예열 → 탭 전환 시 즉시 표시
+        listOf("Youtube 1", "Youtube 2").filter { it != currentSource }.forEach { prefetch(it) }
     }
 
     // ---------- 콘텐츠 카드 ----------
@@ -58,12 +66,12 @@ class MainActivity : AppCompatActivity() {
         sourceButtons["Youtube 1"] = view.findViewById(R.id.btnSourceYt1)
         sourceButtons["Youtube 2"] = view.findViewById(R.id.btnSourceYt2)
         sourceButtons.forEach { (key, btn) -> btn.setOnClickListener { loadSource(key) } }
+        setSourceActive(currentSource)
 
         view.findViewById<MaterialButton>(R.id.btnRefreshAll).setOnClickListener { loadSource(currentSource) }
-        view.findViewById<MaterialButton>(R.id.btnNextContent).setOnClickListener {
-            loadSource(ContentCrawler.SOURCE_KEYS.random())
-        }
+        view.findViewById<MaterialButton>(R.id.btnNextContent).setOnClickListener { showNext() }
         view.findViewById<MaterialButton>(R.id.btnCopyContent).setOnClickListener {
+            if (shareText().isBlank()) { toast("먼저 콘텐츠를 가져오세요."); return@setOnClickListener }
             copyToClipboard("SNS", shareText())
             toast("문구가 복사되었습니다.")
         }
@@ -77,26 +85,67 @@ class MainActivity : AppCompatActivity() {
         }
 
         container.addView(view)
-        loadSource(currentSource)
     }
 
+    /** 선택 소스의 최신 글을 비동기로 가져온다. 실패 시 마지막 성공본 캐시 표시. */
     private fun loadSource(source: String) {
         currentSource = source
+        prefs.edit().putString("last_source", source).apply()
         setSourceActive(source)
-        Thread {
+        lifecycleScope.launch {
             val feeds = ContentCrawler.fetchFromSource(source)
-            runOnUiThread {
-                if (feeds.isNotEmpty()) applyItem(feeds.random())
-                else toast("$source 데이터를 가져올 수 없습니다.")
+            if (feeds.isNotEmpty()) {
+                currentFeeds = feeds
+                currentIndex = 0
+                applyItem(feeds.first())
+                cacheItem(source, feeds.first())
+            } else {
+                val cached = cachedItem(source)
+                if (cached != null) {
+                    currentFeeds = listOf(cached)
+                    currentIndex = 0
+                    applyItem(cached)
+                    toast("$source: 네트워크 실패 — 마지막 저장본 표시")
+                } else {
+                    toast("$source 데이터를 가져올 수 없습니다.")
+                }
             }
-        }.start()
+        }
+    }
+
+    /** UI를 건드리지 않고 캐시만 갱신(예열). */
+    private fun prefetch(source: String) {
+        lifecycleScope.launch {
+            val feeds = ContentCrawler.fetchFromSource(source)
+            if (feeds.isNotEmpty()) cacheItem(source, feeds.first())
+        }
+    }
+
+    /** 같은 소스 내 다음 글로 순환. */
+    private fun showNext() {
+        if (currentFeeds.isEmpty()) { loadSource(currentSource); return }
+        currentIndex = (currentIndex + 1) % currentFeeds.size
+        applyItem(currentFeeds[currentIndex])
     }
 
     private fun applyItem(item: ContentCrawler.FeedItem) {
         currentLink = item.link
         editCaption.setText(item.title)
         val shortTitle = if (item.title.length > 40) item.title.take(40) + "…" else item.title
-        textPreview.text = "원문: $shortTitle\n${item.link}"
+        textPreview.text = "${item.sourceName} · 원문: $shortTitle\n${item.link}"
+    }
+
+    private fun cacheItem(source: String, item: ContentCrawler.FeedItem) {
+        prefs.edit()
+            .putString("cache_${source}_title", item.title)
+            .putString("cache_${source}_link", item.link)
+            .apply()
+    }
+
+    private fun cachedItem(source: String): ContentCrawler.FeedItem? {
+        val t = prefs.getString("cache_${source}_title", null) ?: return null
+        val l = prefs.getString("cache_${source}_link", null) ?: return null
+        return ContentCrawler.FeedItem(t, l, source)
     }
 
     private fun setSourceActive(active: String) {

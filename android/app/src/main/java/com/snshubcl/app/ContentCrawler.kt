@@ -1,70 +1,96 @@
 package com.snshubcl.app
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.net.URL
 
 /**
- * 본인 블로그/유튜브 RSS를 읽어 글 목록을 가져온다.
- * 블로킹 함수 — 반드시 백그라운드 스레드에서 호출할 것. (코루틴 의존성 없음)
+ * 내 블로그/유튜브 RSS(Atom)를 읽어 글 목록을 가져온다.
+ *
+ * 파싱 원칙: title·link·yt:videoId·published 는 <entry>/<item> **안에 있을 때만** 읽는다.
+ * (피드 최상위 <title>(채널명)을 영상 제목과 섞어 읽어 최신 글이 누락되던 버그 수정)
+ * 항목 순서는 피드 그대로(최신이 먼저) 유지하므로 first() = 최신.
  */
 object ContentCrawler {
 
-    data class FeedItem(val title: String, val link: String, val sourceName: String)
+    data class FeedItem(
+        val title: String,
+        val link: String,
+        val sourceName: String,
+        val published: String = ""
+    )
 
     val SOURCE_KEYS = listOf("Blog Dica", "Blog MacD", "Youtube 1", "Youtube 2")
 
     private val RSS_SOURCES = mapOf(
         "Blog Dica" to "https://rss.blog.naver.com/dicajohn.xml",
         "Blog MacD" to "https://rss.blog.naver.com/macdcross.xml",
-        "Youtube 1" to "https://www.youtube.com/feeds/videos.xml?channel_id=UCvW8O0z2m3L7zI6C3U_Y_PA",
-        "Youtube 2" to "https://www.youtube.com/feeds/videos.xml?channel_id=UCjKTu-YcMThdMZ0LggSVPPUTVpFj7GziF"
+        // 핸들에서 해석한 정확한 channel_id (RSS는 @핸들이 아니라 channel_id 필요)
+        "Youtube 1" to "https://www.youtube.com/feeds/videos.xml?channel_id=UCAswZxbVw8QfcjN3f2rO8og", // @KreativeTrip
+        "Youtube 2" to "https://www.youtube.com/feeds/videos.xml?channel_id=UCsgea8JdRXlZluEdNzqWb-Q"  // @aki6823
     )
 
-    fun fetchFromSource(sourceKey: String): List<FeedItem> {
-        val urlString = RSS_SOURCES[sourceKey] ?: return emptyList()
+    suspend fun fetchFromSource(sourceKey: String): List<FeedItem> = withContext(Dispatchers.IO) {
+        val urlString = RSS_SOURCES[sourceKey] ?: return@withContext emptyList()
         val results = mutableListOf<FeedItem>()
         try {
             val parser = XmlPullParserFactory.newInstance().newPullParser()
             URL(urlString).openStream().use { stream ->
                 parser.setInput(stream, "UTF-8")
-                var eventType = parser.eventType
-                var currentTitle = ""
-                var currentLink = ""
+                var event = parser.eventType
+                var inItem = false
+                var title = ""
+                var link = ""
+                var published = ""
 
-                while (eventType != XmlPullParser.END_DOCUMENT) {
+                while (event != XmlPullParser.END_DOCUMENT) {
                     val name = parser.name
-                    if (eventType == XmlPullParser.START_TAG) {
-                        when (name) {
-                            "title" -> {
-                                val text = try { parser.nextText() } catch (e: Exception) { "" }
-                                if (currentTitle.isEmpty()) currentTitle = text
+                    when (event) {
+                        XmlPullParser.START_TAG -> when (name) {
+                            "entry", "item" -> {
+                                inItem = true; title = ""; link = ""; published = ""
                             }
-                            "link" -> {
+                            "title" -> if (inItem && title.isEmpty()) {
+                                title = readText(parser)
+                            }
+                            "link" -> if (inItem) {
                                 val href = parser.getAttributeValue(null, "href")
-                                currentLink = if (href != null) href
-                                              else try { parser.nextText() } catch (e: Exception) { "" }
+                                if (href != null) {
+                                    if (link.isEmpty()) link = href          // Atom: rel="alternate"
+                                } else {
+                                    val t = readText(parser)                 // RSS: <link>text</link>
+                                    if (t.isNotBlank()) link = t
+                                }
                             }
-                            "yt:videoId" -> {
-                                val videoId = try { parser.nextText() } catch (e: Exception) { "" }
-                                if (videoId.isNotBlank()) currentLink = "https://www.youtube.com/watch?v=$videoId"
+                            // yt:videoId — 네임스페이스 비활성 시 "yt:videoId", 활성 시 "videoId"
+                            "yt:videoId", "videoId" -> if (inItem) {
+                                val v = readText(parser)
+                                if (v.isNotBlank()) link = "https://www.youtube.com/watch?v=$v"
+                            }
+                            "published", "pubDate" -> if (inItem && published.isEmpty()) {
+                                published = readText(parser)
                             }
                         }
-                    } else if (eventType == XmlPullParser.END_TAG && (name == "entry" || name == "item")) {
-                        if (currentTitle.isNotBlank() && currentLink.isNotBlank() && !isMetaTitle(currentTitle)) {
-                            results.add(FeedItem(currentTitle.trim(), cleanUrl(currentLink), sourceKey))
+                        XmlPullParser.END_TAG -> if (name == "entry" || name == "item") {
+                            if (title.isNotBlank() && link.isNotBlank()) {
+                                results.add(FeedItem(title.trim(), cleanUrl(link), sourceKey, published))
+                            }
+                            inItem = false
                         }
-                        currentTitle = ""
-                        currentLink = ""
                     }
-                    eventType = parser.next()
+                    event = parser.next()
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return results.distinctBy { it.link }
+        results.distinctBy { it.link }
     }
+
+    private fun readText(parser: XmlPullParser): String =
+        try { parser.nextText() } catch (e: Exception) { "" }
 
     private fun cleanUrl(url: String): String {
         if (!url.contains("?")) return url
@@ -77,10 +103,5 @@ object ContentCrawler {
             }
             else -> url
         }
-    }
-
-    private fun isMetaTitle(title: String): Boolean {
-        val meta = listOf("Blog", "YouTube", "네이버 블로그", "dicajohn", "macdcross", "KreativeTrip", "aki6823")
-        return meta.any { title.equals(it, ignoreCase = true) } || title.contains("RSS")
     }
 }
