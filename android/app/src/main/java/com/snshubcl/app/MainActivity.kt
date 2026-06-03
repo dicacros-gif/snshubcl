@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -22,10 +23,11 @@ import kotlinx.coroutines.launch
 /**
  * 대시보드:
  *  1) 콘텐츠 카드 — 내 블로그/유튜브 RSS의 **최신** 글을 가져와 수정 가능한 캡션을 만들고,
- *     복사 / 공유 시트로 내보낸다. 네트워크 실패 시 마지막 성공본(SharedPreferences)을 보여준다.
+ *     복사 / 공유 시트 / "전체 순서대로 공유"로 내보낸다. 실패 시 마지막 성공본 캐시 표시.
  *  2) 플랫폼 카드 5개 — 인앱 브라우저·네이티브 앱 열기 + "이 캡션으로 공유"(공식 작성 화면).
  *
- * 자동 클릭/팔로우/좋아요/댓글 같은 자동화는 없다. 게시는 사람이 직접.
+ * "전체 순서대로 공유" = X·Threads·Facebook·LinkedIn의 공식 작성 화면을 캡션 채워 차례로 열고
+ * 사람이 각 화면에서 검토 후 직접 게시한다. 자동 게시/다계정 확산은 없다.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -39,6 +41,12 @@ class MainActivity : AppCompatActivity() {
     private var currentIndex: Int = 0
     private val sourceButtons = mutableMapOf<String, MaterialButton>()
 
+    // 순차 공유 큐 (작성 화면을 차례로 여는 용도)
+    private val shareQueue = ArrayDeque<String>()
+    private var shareTotal = 0
+    private val composeLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { advanceShareQueue() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)            // UI 먼저 표시
@@ -49,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         setupPlatformCards(container)
 
         loadSource(currentSource)                          // 시작 즉시 최신 가져오기(백그라운드)
-        // 두 유튜브 최신을 캐시에 예열 → 탭 전환 시 즉시 표시
         listOf("Youtube 1", "Youtube 2").filter { it != currentSource }.forEach { prefetch(it) }
     }
 
@@ -75,6 +82,7 @@ class MainActivity : AppCompatActivity() {
             copyToClipboard("SNS", shareText())
             toast("문구가 복사되었습니다.")
         }
+        view.findViewById<MaterialButton>(R.id.btnShareAll).setOnClickListener { startSequentialShare() }
         view.findViewById<MaterialButton>(R.id.btnShareSheet).setOnClickListener {
             if (shareText().isBlank()) { toast("먼저 콘텐츠를 가져오세요."); return@setOnClickListener }
             val send = Intent(Intent.ACTION_SEND).apply {
@@ -169,6 +177,41 @@ class MainActivity : AppCompatActivity() {
             cap.isBlank() -> currentLink
             else -> "$cap\n$currentLink"
         }
+    }
+
+    // ---------- 순차 공유 (작성 화면을 차례로 열기) ----------
+
+    /** 웹 작성 가능한 플랫폼들의 공식 작성 화면을 순서대로 연다. 게시는 사람이 직접. */
+    private fun startSequentialShare() {
+        if (currentLink.isBlank()) { toast("먼저 콘텐츠를 가져오세요."); return }
+        copyToClipboard("SNS", shareText())
+        shareQueue.clear()
+        Sns.ALL.filter { Sns.hasWebCompose(it.id) }.forEach { shareQueue.addLast(it.id) }
+        shareTotal = shareQueue.size
+        if (shareTotal == 0) { toast("공유할 플랫폼이 없습니다."); return }
+        toast("순서대로 작성 화면을 엽니다. 각 화면에서 게시 후 '다음 ▶'.")
+        advanceShareQueue()
+    }
+
+    /** 큐에서 다음 플랫폼의 작성 화면을 연다. 큐가 비면 종료. (작성 화면 복귀 시 콜백으로 호출) */
+    private fun advanceShareQueue() {
+        val id = shareQueue.removeFirstOrNull()
+        if (id == null) {
+            if (shareTotal > 0) {
+                toast("전체 공유 완료 — Instagram은 카드에서 따로 공유(캡션 복사됨).")
+                shareTotal = 0
+            }
+            return
+        }
+        val net = Sns.byId(id)
+        val pos = shareTotal - shareQueue.size
+        composeLauncher.launch(
+            Intent(this, WebActivity::class.java)
+                .putExtra("sns", id)
+                .putExtra("url", Sns.composeUrl(id, currentCaption(), currentLink))
+                .putExtra("title", "${net.name} 작성 ($pos/$shareTotal)")
+                .putExtra("seq", true)
+        )
     }
 
     // ---------- 플랫폼 카드 ----------
